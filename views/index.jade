@@ -1,0 +1,24 @@
+extends layout
+
+block content
+	div.container-fluid.h-100
+		div.row.h-100
+			div.col-2(style="background-color:#dddddd")
+				div.container
+					div.row.py-2
+						div.col-12
+							button#addRgn.btn.btn-primary.btn-block Adicionar Região
+					div.row.py-2
+						div.col-12
+							button#addPnt.btn.btn-primary.btn-block Adicionar Ponto
+					div.row.py-2
+						div.col-12
+							button#saveBtn.btn.btn-success.btn-block Salvar
+					div.row.py-2
+						div.col-12
+							button#resetBtn.btn.btn-warning.btn-block Resetar
+					div.row.py-2
+						div.col-12
+							button#cancelBtn.btn.btn-danger.btn-block Cancelar
+			div.col-10
+					div#mapid(style="height:100%")
