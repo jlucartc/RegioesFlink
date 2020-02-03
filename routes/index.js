@@ -22,42 +22,94 @@ var router = express.Router();
 
 router.get('/', function(req, res, next) {
 
-    var storedPolygons = key('regioes').select().then( res => {
+    var pointsAndRegions = new Array()
 
-      console.log(res)
+    key('regioes').select().then( data => {
 
-    } )
+      data.forEach( val => {
 
-    var storedPoints = key('pontos').select().then( res => {
+        pointsAndRegions.push(val)
 
-      console.log(res)
+      })
+      return key('raios').select()
 
-    } )
+    }).then(
 
-    console.log(storedPolygons.toString())
+      data => {
 
-    var pointsAndRegions = [storedPoints,storedPolygons]
+        data.forEach(val => {
 
-    res.render('index', { title: 'Express' , data : pointsAndRegions });
+          pointsAndRegions.push(val)
 
-});
+        })
 
-router.post('saveData',function(req,res,next){
+        res.render('index', { title: 'Express' , data : pointsAndRegions })
 
-    var polygon = JSON.stringify([[1.0,0.0],[1.0,1.0],[2.0,0.0],[2.0,1.0],[1.0,0.0]]).replace(/\[/g,'(');
-    polygon = polygon.replace(/\]/g,')')
-
-    console.log(polygon)
-
-    var nome = 'regiao1'
-
-    var insertPolygon = key('regioes').insert(key.raw(` (nome,regiao) values ('${nome}', polygon(path '${polygon}'))`)).then(
-
-      ins => { console.log('inserted row')}, err => {console.log(err)}
+      }
 
     )
 
-    console.log(insertPolygon.toString())
+    /*key('raios').select()
+    .then( data => {
+
+      storedPoints = data
+      console.log(storedPoints)
+
+    }, err => { console.log(err)})
+
+    //var pointsAndRegions = storedPoints.concat(storedPolygons)
+
+    res.render('index', { title: 'Express' , data : pointsAndRegions });*/
+
+});
+
+router.post('/saveData',function(req,res,next){
+
+    if(req.body.type == "regiao"){
+
+      var polygon = JSON.stringify(req.body.data).replace(/\[/g,'(').replace(/\]/g,')');
+
+      var nome = req.body.nome
+
+      if(req.body.data.length >= 3){
+
+        var insertPolygon = key('regioes').insert(key.raw(` (nome,regiao) values ('${nome}', polygon(path '${polygon}'))`))
+        .then(
+          res => {
+
+            console.log(`Região '${nome}' inserida com sucesso!`)
+
+          }, err => {
+
+            console.log("Error")
+
+          }
+        );
+
+        console.log(insertPolygon)
+
+      }
+
+    }else if(req.body.type == "pontos"){
+
+      var ponto = JSON.stringify(req.body.data).replace(/\[/g,'(').replace(/\]/g,')');
+
+      ponto = ponto.slice(1,ponto.length-1)
+
+      //console.log(ponto.slice(1,ponto.length-1))
+
+      var nome = req.body.nome
+
+      var raio = req.body.raio
+
+      var insertPoints = key('raios').insert(key.raw(` (nome,raio) values ('${nome}', circle('${ponto}',${raio}))`))
+      .then(res => { console.log(`Raio '${nome}'cadastrado com sucesso!`)}, err => { console.log('Erro no cadastro do raio')})
+
+      //console.log(insertPoints)
+
+    }
+
+    res.sendStatus(200)
 
 });
 
