@@ -137,6 +137,37 @@ router.get('/getRaios',function(req,res,next){
   )
 
 });
+router.get('/getAreas',function(req,res,next){
+
+  var areas = new Array();
+
+  knex('raios').select().then(
+    data => {
+
+      data.forEach(val => {
+
+        areas.push(val)
+
+      })
+
+      return knex('regioes').select()
+
+    }
+  ).then(
+    data => {
+
+      data.forEach(val => {
+
+        areas.push(val)
+
+      })
+
+      res.json(areas)
+
+    }
+  )
+
+});
 router.post('/saveRegiao',function(req,res,next){
 
   var nome  = req.body.nome
@@ -184,6 +215,35 @@ router.post('/saveRaio',function(req,res,next){
     }
 
   )
+
+});
+
+router.post('/fazConsulta',function(req,res,next){
+
+  var type  = JSON.stringify(req.body.type).replace(/\"/g,'')
+  var inicio = JSON.stringify(req.body.inicio).replace(/\"/g,'')
+  var fim = JSON.stringify(req.body.fim).replace(/\"/g,'')
+  var key = JSON.stringify(req.body.key).replace(/\"/g,'')
+
+  console.log(type)
+
+  if(type == "raio"){
+
+    var query = knex('onibus').select().innerJoin(knex.raw(` regioes on regioes.regiao @> onibus.posicao where onibus.timestamp >= '${inicio}' and onibus.timestamp <= '${fim}' and regioes.nome = '${key}'`))
+    .toSQL().toNative()
+
+    console.log(query)
+
+  }else if(type == "regiao"){
+
+    var query = knex('onibus').select().innerJoin(knex.raw(` regioes on regioes.regiao @> onibus.posicao where onibus.timestamp >= '${inicio}' and onibus.timestamp <= '${fim}' and regioes.nome = '${key}'`))
+    .toSQL().toNative()
+
+    console.log(query)
+
+  }
+
+  res.json({msg : 'msg'})
 
 });
 
